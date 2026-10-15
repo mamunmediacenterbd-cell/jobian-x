@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>জবিয়ান এক্স | প্রশ্নপত্র নির্মাতা</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f2f6fc;color:#172033}
+header{background:#123c70;color:white;padding:22px 16px;text-align:center}
+header h1{margin:0;font-size:27px}
+header p{margin:8px 0 0}
+main{max-width:760px;margin:24px auto;padding:16px}
+.card{background:white;border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 3px 12px #0000000d}
+h2{font-size:20px;margin-top:0}
+label{display:block;margin:12px 0 6px;font-weight:bold}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ccd6e4;border-radius:8px;font-size:16px}
+button{padding:12px 16px;border:0;border-radius:8px;background:#1768d2;color:white;font-size:16px;margin:12px 6px 0 0}
+.question{border-bottom:1px solid #ddd;padding:12px 0;line-height:1.8}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.note{color:#5b6b80;font-size:14px}
+@media print{header,.formcard,.noprint{display:none!important}body{background:white}main{margin:0;padding:0}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>জবিয়ান এক্স</h1>
+<p>সহজেই তৈরি কর প্রশ্নপত্র</p>
+</header>
+<main>
+<section class="card formcard">
+<h2>নতুন প্রশ্নপত্র তৈরি কর</h2>
+<label>পরীক্ষার নাম</label>
+<input id="exam" value="নৈর্ব্যক্তিক মূল্যায়ন পরীক্ষা">
+<label>শ্রেণি</label>
+<select id="cls"><option>ষষ্ঠ</option><option>সপ্তম</option><option>অষ্টম</option><option selected>নবম-দশম</option><option>একাদশ-দ্বাদশ</option></select>
+<label>বিষয়</label>
+<input id="subject" value="বাংলা">
+<label>পরীক্ষার সময়</label>
+<input id="time" value="১ ঘণ্টা ৪০ মিনিট">
+<label>পূর্ণমান</label>
+<input id="marks" type="number" value="60">
+<label>প্রশ্নের ধরন</label>
+<select id="kind" onchange="toggleOptions()"><option value="mcq">MCQ</option><option value="short">সংক্ষিপ্ত</option><option value="creative">সৃজনশীল</option></select>
+<label>প্রশ্ন লিখ</label>
+<textarea id="qtext" rows="3" placeholder="এখানে প্রশ্ন লিখ"></textarea>
+<div id="opts">
+<label>ক) অপশন</label><input id="o1">
+<label>খ) অপশন</label><input id="o2">
+<label>গ) অপশন</label><input id="o3">
+<label>ঘ) অপশন</label><input id="o4">
+</div>
+<button onclick="addQ()">প্রশ্ন যোগ কর</button>
+<button onclick="clearQ()" style="background:#64748b">সব মুছুন</button>
+<p class="note">প্রশ্ন যোগ করলে নিচে প্রিভিউ দেখা যাবে।</p>
+</section>
+<section class="card">
+<div id="paper">
+<h2 id="pExam" style="text-align:center">নৈর্ব্যক্তিক মূল্যায়ন পরীক্ষা</h2>
+<p style="text-align:center">জবিয়ান এক্স</p>
+<hr>
+<p>শ্রেণি: <span id="pCls">নবম-দশম</span> | বিষয়: <span id="pSubject">বাংলা</span></p>
+<p>সময়: <span id="pTime">১ ঘণ্টা ৪০ মিনিট</span> | পূর্ণমান: <span id="pMarks">৬০</span></p>
+<hr>
+<div id="questions"></div>
+</div>
+<div class="noprint">
+<button onclick="window.print()">PDF / প্রিন্ট</button>
+</div>
+</section>
+</main>
+<script>
+let qs=[];
+const $=id=>document.getElementById(id);
+function toggleOptions(){$('opts').style.display=$('kind').value==='mcq'?'block':'none'}
+function bn(n){return String(n).replace(/\d/g,d=>'০১২৩৪৫৬৭৮৯'[d])}
+function safe(s){let d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function addQ(){
+let text=$('qtext').value.trim();
+if(!text){alert('প্রথমে প্রশ্ন লিখ');return}
+let kind=$('kind').value;
+qs.push({text,kind,opts:[$('o1').value,$('o2').value,$('o3').value,$('o4').value]});
+$('qtext').value='';
+['o1','o2','o3','o4'].forEach(id=>$(id).value='');
+render();
+}
+function render(){
+$('pExam').textContent=$('exam').value;
+$('pCls').textContent=$('cls').value;
+$('pSubject').textContent=$('subject').value;
+$('pTime').textContent=$('time').value;
+$('pMarks').textContent=bn($('marks').value);
+$('questions').innerHTML=qs.map((q,i)=>'<div class="question"><b>'+bn(i+1)+'.</b> '+safe(q.text)+(q.kind==='mcq'?'<div class="opts">'+q.opts.map((o,j)=>'<div>'+['ক','খ','গ','ঘ'][j]+') '+safe(o)+'</div>').join('')+'</div>':'')+'</div>').join('');
+}
+function clearQ(){if(confirm('সব প্রশ্ন মুছবে?')){qs=[];render()}}
+['exam','cls','subject','time','marks'].forEach(id=>$(id).addEventListener('input',render));
+toggleOptions();render();
+</script>
+</body>
+</html>
